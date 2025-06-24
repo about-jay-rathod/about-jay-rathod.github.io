@@ -1052,102 +1052,162 @@ body {
 	word-break: break-all;
 }
 
- /*- Email Me Form------------------------------------------------*/
-        .email-form-container {
-            margin-top: 30px;
-        }
+/* --- Custom Email Me Form --- */
+.custom-email-container {
+	margin-top: 30px;
+}
 
-        .email-form {
-            padding: 30px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-        }
+.custom-email-form {
+	padding: 30px;
+	background: #09203a;
+	border-radius: 15px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 1px 5px rgba(0, 0, 0, 0.2);
+	position: relative;
+	z-index: 1;
+}
 
-        .email-form .form-group {
-            margin-bottom: 20px;
-        }
+.custom-email-form .form-group {
+	margin-bottom: 20px;
+}
 
-        .email-form .form-control {
-            border-radius: 10px;
-            box-shadow: none;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: 0.3s;
-            color: #fff;
-        }
+.custom-email-form input,
+.custom-email-form textarea {
+	color: #fff !important;
+	/* force full white text */
+	background: rgba(255, 255, 255, 0.15);
+	/* bump up opacity for better contrast */
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	/* make border more visible */
+	border-radius: 4px;
+	box-shadow: none;
+	font-size: 14px;
+	transition: all 0.3s ease;
+	width: 100%;
+	padding: 15px 18px;
+	outline: none;
+	opacity: 1;
+}
 
-        .email-form .form-control:focus {
-            background-color: rgba(255, 255, 255, 0.11);
-            border-color: #18d26e;
-            box-shadow: none;
-        }
+.custom-email-form textarea {
+	padding: 12px 18px;
+}
 
-        .email-form .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-            opacity: 1;
-        }
+.custom-email-form input:focus,
+.custom-email-form textarea:focus {
+	background-color: rgba(18, 214, 64, 0.15);
+	/* subtle greenish glow background on focus */
+	border-color: #12d640;
+	/* keep that green border */
+	box-shadow: 0 0 6px 2px rgba(18, 214, 64, 0.5);
+}
 
-        .email-form button[type=submit] {
-            background: #18d26e;
-            border: 0;
-            padding: 12px 35px;
-            color: #fff;
-            transition: 0.4s;
-            border-radius: 50px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+.custom-email-form input::placeholder,
+.custom-email-form textarea::placeholder {
+	color: rgba(255, 255, 255, 0.3);
+	opacity: 1;
+}
 
-        .email-form button[type=submit]:hover {
-            background: #15bb62;
-            transform: translateY(-2px);
-        }
-        
-        .email-form .loading, .email-form .error-message, .email-form .sent-message {
-            display: none;
-            color: #fff;
-            text-align: center;
-            padding: 15px;
-            font-weight: 600;
-            border-radius: 15px;
-            margin: 15px 0;
-        }
-        
-        .email-form .loading {
-             background: rgba(255, 255, 255, 0.1);
-        }
+.custom-email-form button[type="submit"] {
+	background: #1c7d32;
+	border: 0;
+	padding: 10px 30px;
+	color: #fff;
+	transition: all 0.4s ease;
+	border-radius: 4px;
+	font-weight: 600;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	z-index: 1;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
 
-        .email-form .error-message {
-            background: #ed3c0d;
-        }
+.custom-email-form button[type="submit"]:hover {
+	background: #15bb62;
+	transform: scale(1.02);
+	box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6), 0 0 20px rgba(18, 214, 64, 0.7);
+}
 
-        .email-form .sent-message {
-            background: #18d26e;
-        }
-        
-        .email-form .loading:before {
-            content: "";
-            display: inline-block;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            margin: 0 10px -6px 0;
-            border: 3px solid #18d26e;
-            border-top-color: #333;
-            animation: animate-loading 1s linear infinite;
-        }
+.custom-email-form button[type="submit"]::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 0;
+	height: 0;
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	opacity: 0;
+	transition: width 0.4s ease-in-out, height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	z-index: 0;
+}
 
-        @keyframes animate-loading {
-            0% {
-                transform: rotate(0deg);
-            }
+.custom-email-form button[type="submit"]:hover::before {
+	width: 200%;
+	height: 200%;
+	opacity: 1;
+}
 
-            100% {
-                transform: rotate(360deg);
-            }
-        }
+.custom-email-form button[type="submit"] span {
+	position: relative;
+	z-index: 1;
+}
+
+.custom-email-form .loading,
+.custom-email-form .error-message,
+.custom-email-form .sent-message {
+	display: none;
+	color: #fff;
+	text-align: center;
+	padding: 15px;
+	font-weight: 600;
+	border-radius: 4px;
+	margin: 15px 0;
+}
+
+.custom-email-form .loading {
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.custom-email-form .error-message {
+	background: #ed3c0d;
+	color: #fff !important;
+	/* force full white text */
+
+}
+
+.custom-email-form .sent-message {
+	background: #1c7d32;
+	color: #fff !important;
+	/* force full white text */
+
+}
+
+.custom-email-form .loading:before {
+	content: "";
+	display: inline-block;
+	border-radius: 50%;
+	width: 24px;
+	height: 24px;
+	margin: 0 10px -6px 0;
+	border: 3px solid #1c7d32;
+	border-top-color: #eee;
+	animation: animate-loading 1s linear infinite;
+}
+
+@keyframes animate-loading {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
 
 .left-panel-section {
 	margin-bottom: 2.5rem;
