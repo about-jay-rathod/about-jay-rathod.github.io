@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
    }
 
    async function getGeminiResponse(currentPrompt) {
-      const apiKey = "AIzaSyBaPn7Liee5kycX-HA0EwQOlTWfyQK8o7Q";
+      const apiKey = "AIzaSyBaPn7Liee5kycX-HA0EwQOlTWfyQK8o7Q";// Exposed because this is a static site and the API key is not extremely sensitive.
       const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
       const historyString = chatHistory
