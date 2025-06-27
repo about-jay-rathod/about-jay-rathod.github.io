@@ -203,6 +203,8 @@ h6 {
 	right: 0;
 	width: 400px;
 	height: 600px;
+	/* FIX: Ensures the chat window doesn't touch the top of the screen */
+	max-height: calc(100vh - 100px);
 	background-color: #0d1a2b;
 	border: 1px solid rgba(255, 255, 255, 0.1);
 	border-radius: 16px;
@@ -258,10 +260,13 @@ h6 {
 
 .ai-chatbot-title p {
 	margin: 2px 0 0;
-	color: #12D640;
+	color: #718096;
+	/* Default to grey */
 	font-size: 13px;
 	font-weight: 500;
 	font-family: "Poppins", sans-serif;
+	position: relative;
+	padding-left: 14px;
 }
 
 .ai-chatbot-title p::before {
@@ -269,11 +274,30 @@ h6 {
 	display: inline-block;
 	width: 8px;
 	height: 8px;
-	background-color: #12D640;
+	background-color: #718096;
+	/* Default to grey */
 	border-radius: 50%;
-	margin-right: 6px;
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	transition: background-color 0.3s ease;
+}
+
+.ai-chatbot-title p.online {
+	color: #12D640;
+}
+
+.ai-chatbot-title p.online::before {
+	background-color: #12D640;
 	animation: pulse 2s infinite;
 }
+
+.ai-chatbot-title p.offline::before {
+	background-color: #e53e3e;
+	/* Red for offline */
+}
+
 
 @keyframes pulse {
 	0% {
@@ -406,6 +430,21 @@ h6 {
 	background-color: rgba(18, 214, 64, 0.15);
 }
 
+/* Disabled State */
+#ai-chatbot-input:disabled {
+	background-color: #2d3748;
+	cursor: not-allowed;
+}
+
+#ai-chatbot-send-btn:disabled {
+	color: #718096;
+	cursor: not-allowed;
+}
+
+#ai-chatbot-send-btn:disabled:hover {
+	background-color: transparent;
+}
+
 /* Responsive Design */
 @media (max-width: 480px) {
 	#ai-chatbot-container {
@@ -415,7 +454,9 @@ h6 {
 
 	#ai-chatbot-window {
 		width: calc(100vw - 30px);
-		height: calc(100vh - 90px);
+		/* FIX: Ensures a gap from the top on mobile */
+		max-height: calc(100vh - 100px);
+		height: calc(100vh - 100px);
 		bottom: 80px;
 		right: 0;
 	}
