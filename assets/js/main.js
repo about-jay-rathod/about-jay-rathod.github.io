@@ -353,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
    async function initializeChat() {
       try {
-         const gistUrl = "https://gist.githubusercontent.com/about-jay-rathod/418847605369c1a416e3d554f85d0fa3/raw/035f544441acedd1e3662a96f4fd3b6096bb1dee/jay-portfolio-app-generative-ai-api-initial-prompt.txt";
+         const gistUrl = "https://gist.githubusercontent.com/about-jay-rathod/418847605369c1a416e3d554f85d0fa3/raw/f3dd76ca8e62909a0a2d532b42356d3800e75e74/jay-portfolio-app-generative-ai-api-initial-prompt.txt";
          const gistResponse = await fetch(gistUrl);
          if (!gistResponse.ok) throw new Error(`Gist fetch failed: ${gistResponse.status}`);
          systemPrompt = await gistResponse.text();
