@@ -185,33 +185,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
          showMessage(loadingIndicator, 'Sending your message...');
          const formData = new FormData(contactForm);
-         const payload = new URLSearchParams();
-         payload.append('name', formData.get('from_name') || 'N/A');
-         payload.append('email', formData.get('from_email'));
-         payload.append('phone', formData.get('phone_number') || 'N/A');
-         payload.append('subject', formData.get('subject'));
-         payload.append('message', formData.get('message'));
+         
+         const data = {
+            name: formData.get('from_name') || 'Not provided',
+            email: formData.get('from_email'),
+            phone: formData.get('phone_number') || 'Not provided',
+            subject: formData.get('subject'),
+            message: formData.get('message')
+         };
 
-         const url = 'https://script.google.com/macros/s/AKfycbzQ3BFpzdq_ZlJ8KCBRRH1rLMePEqCAOBR_V9V74tbr7gwHVewThXDs7utX4a-5wyRG/exec';
+         // Use Firebase Function (secure API key and email sending)
+         const firebaseProjectId = 'about-jay-rathod';
+         const functionUrl = `https://us-central1-${firebaseProjectId}.cloudfunctions.net/sendContactEmail`;
 
          try {
-            const response = await fetch(url, {
+            const response = await fetch(functionUrl, {
                method: 'POST',
-               body: payload,
+               headers: {
+                  'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(data)
             });
-            if (response.ok) {
-               const data = await response.json();
-               if (data.result === 'success') {
-                  showMessage(sentMessage, data.message || 'Your message has been sent. Thank you!');
-               } else {
-                  showMessage(errorMessage, data.message || 'Failed to send message. Please try again later.', true);
-               }
+            
+            const result = await response.json();
+            
+            if (result.result === 'success') {
+               showMessage(sentMessage, result.message || 'Your message has been sent. Thank you!');
             } else {
-               showMessage(errorMessage, 'Failed to send message. Please try again later.', true);
+               showMessage(errorMessage, result.message || 'Failed to send message. Please try again later.', true);
             }
          } catch (error) {
-            console.error('Network Error:', error);
-            showMessage(errorMessage, 'Oops! We couldn’t send your message right now. Please try again later.', true);
+            console.error('Contact form error:', error);
+            showMessage(errorMessage, 'Failed to send message. Please try again later.', true);
          }
       });
    }
@@ -248,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
    async function handleSendMessage() {
       const userInput = inputField.value.trim();
-      if (userInput === '' || systemPrompt === '' || inputField.disabled) return;
+      if (userInput === '' || inputField.disabled) return;
 
       addMessageToUI(userInput, 'user');
       chatHistory.push({
@@ -308,57 +313,95 @@ document.addEventListener('DOMContentLoaded', () => {
    }
 
    async function getGeminiResponse(currentPrompt) {
-      const apiKey = "";// Exposed because this is a static site and the API key is not extremely sensitive.
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+      // Try Firebase Function first (secure API key)
+      const firebaseProjectId = 'about-jay-rathod';
+      const functionUrl = `https://us-central1-${firebaseProjectId}.cloudfunctions.net/chatbot`;
 
-      const historyString = chatHistory
-         .slice(0, currentPrompt ? -1 : undefined) // Don't include the current prompt in history string
-         .map(message => message.type === 'user' ? `Previous Question: ${message.text}` : `My Previous Answer: ${message.text}`)
-         .join('\n\n');
+      try {
+         const response = await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: currentPrompt })
+         });
 
-      const finalPrompt = `${systemPrompt}\n\n--- CONVERSATION HISTORY ---\n${historyString}\n\nCURRENT QUESTION: ${currentPrompt}`;
-
-      const payload = {
-         contents: [{
-            parts: [{
-               text: finalPrompt
-            }]
-         }]
-      };
-
-      const response = await fetch(apiUrl, {
-         method: 'POST',
-         headers: {
-            'Content-Type': 'application/json'
-         },
-         body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-         const errorBody = await response.text();
-         throw new Error(`API request failed with status ${response.status}: ${errorBody}`);
-      }
-
-      const result = await response.json();
-
-      if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts) {
-         if (result.promptFeedback && result.promptFeedback.blockReason) {
-            return `I am unable to provide a response. Reason: ${result.promptFeedback.blockReason}`;
+         if (response.ok) {
+            const result = await response.json();
+            if (result.success) {
+               return result.response;
+            }
          }
-         throw new Error("Invalid API response structure.");
-      }
+         
+         // If Firebase function fails, fall back to direct API with Gist data
+         throw new Error('Firebase function unavailable');
+         
+      } catch (error) {
+         console.log('Firebase function failed, falling back to direct API:', error.message);
+         
+         // Fallback to direct Gemini API with your Gist data (single source of truth)
+         // NOTE: This exposes API key - only use as fallback when Firebase Functions are unavailable
+         console.warn('Using fallback API - this exposes API keys. Please upgrade to Blaze plan and deploy Functions.');
+         const apiKey = "YOUR_API_KEY_REMOVED_FOR_SECURITY";
+         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-      return result.candidates[0].content.parts[0].text;
+         // Include conversation history in the prompt
+         const historyString = chatHistory
+            .slice(0, currentPrompt ? -1 : undefined)
+            .map(message => message.type === 'user' ? `Previous Question: ${message.text}` : `My Previous Answer: ${message.text}`)
+            .join('\n\n');
+
+         // Use ONLY your Gist data - no hardcoded fallbacks
+         if (!systemPrompt) {
+            throw new Error('Professional data not available. Please try again in a moment.');
+         }
+
+         const finalPrompt = `${systemPrompt}\n\n--- CONVERSATION HISTORY ---\n${historyString}\n\nCURRENT QUESTION: ${currentPrompt}`;
+
+         const payload = {
+            contents: [{
+               parts: [{
+                  text: finalPrompt
+               }]
+            }]
+         };
+
+         const directResponse = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+         });
+
+         if (!directResponse.ok) {
+            const errorBody = await directResponse.text();
+            throw new Error(`API request failed with status ${directResponse.status}: ${errorBody}`);
+         }
+
+         const result = await directResponse.json();
+
+         if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts) {
+            if (result.promptFeedback && result.promptFeedback.blockReason) {
+               return `I am unable to provide a response. Reason: ${result.promptFeedback.blockReason}`;
+            }
+            throw new Error("Invalid API response structure.");
+         }
+
+         return result.candidates[0].content.parts[0].text;
+      }
    }
 
    async function initializeChat() {
       try {
+         // Fetch Jay's system prompt from GitHub Gist (your original implementation)
          const gistUrl = "https://gist.githubusercontent.com/about-jay-rathod/418847605369c1a416e3d554f85d0fa3/raw/f3dd76ca8e62909a0a2d532b42356d3800e75e74/jay-portfolio-app-generative-ai-api-initial-prompt.txt";
          const gistResponse = await fetch(gistUrl);
          if (!gistResponse.ok) throw new Error(`Gist fetch failed: ${gistResponse.status}`);
          systemPrompt = await gistResponse.text();
 
-         await getGeminiResponse("Hello"); // API health check
+         // Test connectivity with a simple hello message
+         await getGeminiResponse("Hello");
 
          setStatus('Online');
          const initialGreeting = "Hi there! I'm Jay's AI assistant. Ask me anything about his experience, skills, or projects.";
