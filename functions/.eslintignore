@@ -1,0 +1,9 @@
+*_old.js
+*_backup.js
+*.bak
+README_old.md
+node_modules/
+.env
+coverage/
+dist/
+build/

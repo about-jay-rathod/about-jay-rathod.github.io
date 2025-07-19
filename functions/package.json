@@ -1,34 +1,88 @@
 {
   "name": "jay-portfolio-functions",
   "version": "2.1.0",
-  "description": "Firebase Functions for Jay Rathod's Portfolio Website - AI Chatbot & Contact Form",
+  "description": "Firebase Functions for Jay Rathod's Portfolio Website - AI Chatbot & Contact Form with Gemini 2.0 Flash integration",
   "author": "Jay Rathod <jayrathod.ca@gmail.com>",
   "license": "MIT",
+  "homepage": "https://about-jay-rathod.web.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/about-jay-rathod/about-jay-rathod.github.io",
+    "directory": "functions"
+  },
+  "keywords": [
+    "firebase-functions",
+    "ai-chatbot",
+    "gemini-api",
+    "nodemailer",
+    "contact-form",
+    "serverless"
+  ],
   "scripts": {
     "serve": "firebase emulators:start --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "npm run build && firebase emulators:exec --only functions 'npm run test:unit'",
-    "build": "echo 'No build step required for JavaScript functions'",
+    "test": "npm run test:lint && npm run test:unit",
+    "test:unit": "firebase emulators:exec --only functions 'node test/unit.test.js'",
+    "test:integration": "firebase emulators:exec --only functions 'node test/integration.test.js'",
+    "test:lint": "eslint . --fix",
+    "build": "npm run lint && npm run validate-env",
+    "validate-env": "node scripts/validate-env.js",
     "check-updates": "npm outdated",
     "update-deps": "npm update",
     "security-audit": "npm audit",
-    "security-fix": "npm audit fix"
+    "security-fix": "npm audit fix",
+    "format": "prettier --write \"**/*.js\"",
+    "lint": "eslint . --fix",
+    "validate": "npm run lint && npm run security-audit && npm run validate-env",
+    "precommit": "npm run format && npm run validate",
+    "verify-deployment": "node scripts/verify-deployment.js"
   },
   "engines": {
     "node": "20"
   },
-  "main": "portfolio-firebase-functions.js",
+  "main": "index.js",
   "dependencies": {
-    "dotenv": "^16.0.0",
-    "firebase-admin": "^12.0.0",
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.1.0",
     "firebase-functions": "^6.4.0",
-    "nodemailer": "^6.9.0"
+    "nodemailer": "^6.9.13"
   },
   "devDependencies": {
-    "firebase-functions-test": "^3.1.0"
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "prettier": "^3.2.5",
+    "jest": "^29.7.0",
+    "firebase-functions-test": "^3.3.0",
+    "@types/node": "^20.11.30"
+  },
+  "eslintConfig": {
+    "extends": ["eslint:recommended", "prettier"],
+    "plugins": ["node"],
+    "env": {
+      "node": true,
+      "es2020": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2020,
+      "sourceType": "module"
+    },
+    "rules": {
+      "no-console": "warn",
+      "no-unused-vars": "error",
+      "prefer-const": "error",
+      "no-var": "error"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "printWidth": 100,
+    "tabWidth": 2
   },
   "private": true
 }

@@ -1,0 +1,61 @@
+{
+  "name": "jay-rathod-portfolio",
+  "version": "2.1.0",
+  "description": "Modern portfolio website with AI chatbot and secure contact form - Built with Firebase Functions and Hosting",
+  "author": "Jay Rathod <jayrathod.ca@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://about-jay-rathod.web.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/about-jay-rathod/about-jay-rathod.github.io"
+  },
+  "keywords": [
+    "portfolio",
+    "firebase",
+    "ai-chatbot",
+    "contact-form",
+    "responsive-design",
+    "gemini-api",
+    "serverless"
+  ],
+  "scripts": {
+    "dev": "firebase serve",
+    "build": "npm run build:functions && npm run build:hosting",
+    "build:functions": "cd functions && npm install && npm run build",
+    "build:hosting": "echo 'Static hosting - no build step required'",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:functions": "cd functions && npm run deploy",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:quick": "firebase deploy",
+    "test": "npm run test:functions && npm run test:hosting",
+    "test:functions": "cd functions && npm test",
+    "test:hosting": "echo 'Static hosting - no tests required'",
+    "logs": "firebase functions:log",
+    "emulate": "firebase emulators:start",
+    "setup": "npm run setup:root && npm run setup:functions",
+    "setup:root": "npm install",
+    "setup:functions": "cd functions && npm install",
+    "clean": "npm run clean:root && npm run clean:functions",
+    "clean:root": "rm -rf node_modules package-lock.json",
+    "clean:functions": "cd functions && rm -rf node_modules package-lock.json",
+    "reinstall": "npm run clean && npm run setup",
+    "check-updates": "npm outdated && cd functions && npm outdated",
+    "update": "npm update && cd functions && npm update",
+    "security-audit": "npm audit && cd functions && npm audit",
+    "security-fix": "npm audit fix && cd functions && npm audit fix",
+    "format": "prettier --write \"**/*.{js,json,md,html,css}\"",
+    "lint": "eslint \"functions/**/*.js\" \"public/**/*.js\"",
+    "validate": "npm run lint && npm run security-audit",
+    "precommit": "npm run format && npm run validate"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.0",
+    "firebase-tools": "^13.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "private": true
+}

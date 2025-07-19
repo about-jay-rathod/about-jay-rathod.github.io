@@ -86,7 +86,42 @@ firebase emulators:start
 firebase emulators:start --only functions,hosting
 ```
 
-### **Deployment Commands**
+### **🔄 Deployment & Redeployment Commands**
+
+#### **📦 Automated Scripts (Initial & Ongoing Deployment)**
+Our custom scripts handle both initial deployment and ongoing redeployment:
+
+**Linux/macOS (bash)**
+```bash
+./deploy.sh             # Full deployment/redeployment
+./deploy.sh functions   # Functions only (great for email logic updates)  
+./deploy.sh hosting     # Hosting only (great for website updates)
+./deploy.sh --no-build  # Skip dependency installation (faster redeployment)
+```
+
+**Windows Command Prompt (Recommended for Windows)**
+```batch
+deploy.bat                # Full deployment/redeployment
+deploy.bat functions      # Functions only
+deploy.bat hosting        # Hosting only
+deploy.bat -NoBuild       # Skip dependency installation (faster redeployment)
+```
+
+**Windows PowerShell (Alternative)**
+```powershell
+.\deploy.ps1              # Full deployment/redeployment
+.\deploy.ps1 functions    # Functions only
+.\deploy.ps1 hosting      # Hosting only  
+.\deploy.ps1 -NoBuild     # Skip dependency installation
+```
+
+**💡 Common Redeployment Scenarios:**
+- 📧 Updated email template? → `deploy.bat functions`
+- 🎨 Changed website styling? → `deploy.bat hosting`
+- 🔄 Full system update? → `deploy.bat`
+- ⚡ Quick update without rebuilding? → `deploy.bat -NoBuild`
+
+#### **🛠️ Manual Firebase Commands (for advanced users)**
 ```bash
 # Deploy everything (hosting + functions)
 firebase deploy

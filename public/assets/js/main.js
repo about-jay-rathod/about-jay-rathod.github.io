@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
          // Use Firebase Function (secure API key and email sending)
          const firebaseProjectId = 'about-jay-rathod';
-         const functionUrl = `https://us-central1-${firebaseProjectId}.cloudfunctions.net/sendContactEmail`;
+         const functionUrl = `https://sendcontactemail-r64livvx2q-uc.a.run.app`;
 
          try {
             const response = await fetch(functionUrl, {
@@ -209,10 +209,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const result = await response.json();
             
-            if (result.result === 'success') {
-               showMessage(sentMessage, result.message || 'Your message has been sent. Thank you!');
+            if (result.success) {
+               const successMsg = `✅ Thank you ${data.name}!\n\nYour message has been sent successfully.\n\n📧 Check your email for confirmation details.\n\nJay will personally reply within 24-48 hours.`;
+               showMessage(sentMessage, successMsg);
             } else {
-               showMessage(errorMessage, result.message || 'Failed to send message. Please try again later.', true);
+               showMessage(errorMessage, result.error?.message || result.message || 'Failed to send message. Please try again later.', true);
             }
          } catch (error) {
             console.error('Contact form error:', error);
@@ -315,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
    async function getGeminiResponse(currentPrompt) {
       // Try Firebase Function first (secure API key)
       const firebaseProjectId = 'about-jay-rathod';
-      const functionUrl = `https://us-central1-${firebaseProjectId}.cloudfunctions.net/chatbot`;
+      const functionUrl = `https://chatbot-r64livvx2q-uc.a.run.app`;
 
       try {
          const response = await fetch(functionUrl, {
@@ -328,8 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
          if (response.ok) {
             const result = await response.json();
-            if (result.success) {
-               return result.response;
+            if (result.success && result.data && result.data.response) {
+               return result.data.response;
             }
          }
          
