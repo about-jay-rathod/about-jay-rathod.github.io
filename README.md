@@ -1,64 +1,38 @@
-# Personal Portfolio 🔥
-> https://about-jay-rathod.github.io/
+# Jay Rathod - Portfolio Redirect
 
-:star: Star me on GitHub — it helps!
+This repository now serves as a simple redirect from GitHub Pages to the live Firebase-hosted portfolio.
 
-[![Maintenance](https://img.shields.io/badge/maintained-yes-green.svg)](https://github.com/about-jay-rathod/about-jay-rathod.github.io/commits/master)
-[![Website shields.io](https://img.shields.io/badge/website-up-yellow)](https://about-jay-rathod.github.io/)
-[![Ask Me Anything !](https://img.shields.io/badge/ask%20me-linkedin-1abc9c.svg)](https://www.linkedin.com/in/jayrathod-ca/)
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
+## 🔗 Live Portfolio
+**Main Site**: [https://about-jay-rathod.web.app](https://about-jay-rathod.web.app)
 
+## 📖 About This Redirect
+- This GitHub Pages site automatically redirects visitors to the Firebase-hosted portfolio
+- The redirect happens both via HTML meta refresh and JavaScript fallback
+- Maintains SEO with proper canonical URLs and meta tags
 
-  
+## 🚀 Firebase Portfolio Features
+The live portfolio includes:
+- **Interactive AI Chatbot** - Powered by Gemini AI
+- **Contact Form** - Direct email integration
+- **Project Showcases** - Complete portfolio of work
+- **Responsive Design** - Optimized for all devices
+- **Enterprise Security** - Rate limiting and CORS protection
 
-## Features 📋
-⚡️ Fully Responsive\
-⚡️ Valid HTML5 & CSS3\
-⚡️ Typing animation using `Typed.js`\
-⚡️ Easy to modify
+## 🛠️ Technical Stack
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: Node.js Firebase Functions
+- **AI Integration**: Google Gemini API
+- **Email**: Gmail API integration
+- **Hosting**: Firebase Hosting
+- **Security**: Enterprise-grade with rate limiting
 
-## Installation & Deployment 📦
-- Clone the repository and modify the content of <b>index.html</b> 
-- Add or remove images from `assets/img/` directory as per your requirement.
-- Update the info of `projects` folder according to your need
-- Use [Github Pages](https://create-react-app.dev/docs/deployment/#github-pages) to create your own website.
-- To deploy your website, first you need to create github repository with name `<your-github-username>.github.io` and push the generated code to the `master` branch.
+## 🔧 Development
+For the complete source code and development setup, visit the private repository containing all credentials and configuration files.
 
-## Sections 📚
-✔️ About\
-✔️ Interests\
-✔️ Education\
-✔️ Online Certification\
-✔️ Experience\
-✔️ Projects \
-✔️ Skills \
-✔️ Resume\
-✔️ Contact Info
+## 📧 Contact
+- **Email**: jayrathod.ca@gmail.com
+- **LinkedIn**: [linkedin.com/in/jay-rathod-0111](https://www.linkedin.com/in/jay-rathod-0111/)
+- **GitHub**: [github.com/about-jay-rathod](https://github.com/about-jay-rathod/)
 
-
-
-## Tools Used 🛠️
-* <b>GitHub Pages</b> - To host my static website (HTML, CSS, JS).
-
-## Contributing 💡
-#### Step 1
-
-- **Option 1**
-    - 🍴 Fork this repo!
-
-- **Option 2**
-    - 👯 Clone this repo to your local machine.
-
-
-#### Step 2
-
-- **Build your code** 🔨🔨🔨
-
-#### Step 3
-
-- 🔃 Create a new pull request.
-
-## License
-[![License](http://img.shields.io/:license-mit-blue.svg?style=flat-square)](http://badges.mit-license.org)
-
-- **[MIT license](http://opensource.org/licenses/mit-license.php)**
+---
+*This redirect ensures a seamless experience for visitors while maintaining the GitHub Pages URL structure.*

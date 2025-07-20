@@ -1,1 +1,17 @@
-.idea
+# GitHub Pages Redirect - Minimal .gitignore
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
