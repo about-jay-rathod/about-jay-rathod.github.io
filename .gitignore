@@ -2,13 +2,35 @@
 # 🔐 SECURITY - NEVER COMMIT SENSITIVE DATA (CRITICAL!)
 # ═══════════════════════════════════════════════════════════════════════════
 
+# Local development configuration (CRITICAL - Contains project details)
+local-env.js
+local-dev.html
+dev-config.js
+test-config.js
+**/local-*.js
+**/dev-*.js
+**/test-*.js
+
 # Environment Variables (CRITICAL - Contains API Keys & Passwords)
 .env
 .env.*
+.env.local
+.env.production
+.env.staging
 functions/.env
 functions/.env.*
 !functions/.env.template
+!.env.example
 *.env*
+!*.env.example
+
+# Temporary development files
+temp-*
+test-*
+debug-*
+**/temp-*
+**/test-*
+**/debug-*
 
 # Firebase Configuration (Contains sensitive project info)
 .firebase/
@@ -20,6 +42,7 @@ firebase-debug.*.log
 *.json
 !package*.json
 !firebase.json
+!tsconfig.json
 serviceAccountKey.json
 google-services.json
 GoogleService-Info.plist
@@ -37,6 +60,19 @@ credentials.js
 auth-config.js
 functions/config.js
 functions/secrets.js
+
+# Temporary security files
+temp-keys.*
+backup-env.*
+config-local.*
+
+# IDE-specific sensitive files
+.vscode/settings.json
+.idea/
+
+# OS-specific sensitive files
+.DS_Store
+Thumbs.db
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 🛠️ NODE.JS & NPM

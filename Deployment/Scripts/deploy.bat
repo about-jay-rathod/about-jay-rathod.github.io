@@ -166,8 +166,10 @@ if errorlevel 1 (
 echo %GREEN%[SUCCESS]%RESET% ✅ Firebase Functions deployed successfully!
 echo %GREEN%[SUCCESS]%RESET% ✅ All serverless functions are now live and operational!
 echo %CYAN%[INFO]%RESET% 📡 Function URLs:
-echo %CYAN%[INFO]%RESET%    • Chatbot: https://chatbot-r64livvx2q-uc.a.run.app
-echo %CYAN%[INFO]%RESET%    • Contact Email: https://sendcontactemail-r64livvx2q-uc.a.run.app
+echo %CYAN%[INFO]%RESET% 🔒 API Endpoints: Configured dynamically for security
+echo %CYAN%[INFO]%RESET%    • Local Dev: http://localhost:5001/YOUR-PROJECT-ID/us-central1/chatbot
+echo %CYAN%[INFO]%RESET%    • Local Dev: http://localhost:5001/YOUR-PROJECT-ID/us-central1/sendContactEmail
+echo %CYAN%[INFO]%RESET%    • Production: Access through website interface with proper authentication
 echo.
 if /i "%DEPLOY_MODE%"=="functions" goto SUCCESS
 

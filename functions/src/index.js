@@ -32,7 +32,7 @@ require('dotenv').config();
 const EmailService = require('./services/EmailService');
 const AIService = require('./services/AIService');
 
-// Import Utilities
+// Import Security & Utilities
 const { validateContactForm, validateChatbotMessage } = require('./utils/validation');
 const {
   createErrorResponse,
@@ -42,7 +42,8 @@ const {
   ErrorFactory,
   validateEnvironmentVariables,
 } = require('./utils/errorHandler');
-const { setupSecurity } = require('./utils/cors');
+const { createSecurityMiddleware } = require('./middleware/security');
+const { VALIDATION_LIMITS } = require('./config/security');
 
 // Initialize Services
 let emailService;
@@ -68,40 +69,72 @@ function initializeServices() {
 }
 
 /**
- * AI Chatbot Function
+ * AI Chatbot Function - SECURED
  *
- * Handles chatbot conversations with AI-powered responses using
- * Google Gemini 2.0 Flash. Includes professional data context
- * and comprehensive error handling.
+ * Handles chatbot conversations with comprehensive security:
+ * - Rate limiting (10 requests per 15 minutes per IP)
+ * - Input validation and sanitization
+ * - Origin verification  
+ * - Request logging
+ * - Abuse detection
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 exports.chatbot = functions.https.onRequest(async (req, res) => {
+  // Apply security middleware
+  const securityMiddleware = createSecurityMiddleware({
+    limitType: 'CHATBOT',
+    requiredFields: ['message'],
+    maxSizes: { message: VALIDATION_LIMITS.MESSAGE.MAX_LENGTH },
+    enableOriginValidation: true,
+  });
+
+  // Execute middleware stack
+  let currentIndex = 0;
+  const executeMiddleware = async () => {
+    if (currentIndex >= securityMiddleware.length) {
+      return handleChatbotRequest(req, res);
+    }
+
+    const middleware = securityMiddleware[currentIndex++];
+    
+    return new Promise((resolve, reject) => {
+      middleware(req, res, (error) => {
+        if (error) {
+          reject(error);
+        } else if (res.headersSent) {
+          resolve(); // Response already sent by middleware
+        } else {
+          executeMiddleware().then(resolve).catch(reject);
+        }
+      });
+    });
+  };
+
   try {
-    // Initialize services if not already done
+    await executeMiddleware();
+  } catch (error) {
+    if (!res.headersSent) {
+      const errorResponse = createErrorResponse(error, 'Chatbot security check');
+      res.status(errorResponse.statusCode).json(errorResponse);
+    }
+  }
+});
+
+async function handleChatbotRequest(req, res) {
+  try {
+    // Initialize services if needed
     if (!aiService) {
       initializeServices();
     }
 
-    // Setup security and CORS
-    if (!setupSecurity(req, res)) {
-      return; // OPTIONS request handled
-    }
-
-    // Validate request method
-    if (req.method !== 'POST') {
-      const error = ErrorFactory.validationError('Only POST method is allowed');
-      const errorResponse = createErrorResponse(error, 'Invalid HTTP method');
-      return res.status(errorResponse.statusCode).json(errorResponse);
-    }
-
-    logInfo('🤖 Chatbot request received', {
-      method: req.method,
+    logInfo('🤖 Secured chatbot request processed', {
+      ip: req.get('x-forwarded-for')?.split(',')[0] || req.ip,
       origin: req.get('Origin'),
     });
 
-    // Validate and sanitize input
+    // Additional message validation
     const { message } = req.body;
     const validation = validateChatbotMessage(message);
 
@@ -113,64 +146,105 @@ exports.chatbot = functions.https.onRequest(async (req, res) => {
       return res.status(errorResponse.statusCode).json(errorResponse);
     }
 
-    // Generate AI response
-    const aiResponse = await aiService.generateChatbotResponse(validation.sanitizedMessage);
+    // Generate AI response with timeout
+    const aiResponse = await Promise.race([
+      aiService.generateChatbotResponse(validation.sanitizedMessage),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Response timeout')), 25000)
+      )
+    ]);
 
     // Return success response
     const successResponse = createSuccessResponse(
       { response: aiResponse },
-      'Chatbot response generated successfully'
+      'Response generated successfully'
     );
 
-    logInfo('✅ Chatbot response sent successfully');
+    logInfo('✅ Secured chatbot response sent');
     res.status(200).json(successResponse);
+
   } catch (error) {
-    const errorResponse = createErrorResponse(error, 'Chatbot function');
+    logError(error, 'Secured chatbot handler');
+    const errorResponse = createErrorResponse(
+      ErrorFactory.apiError('Unable to process request at this time'), 
+      'Chatbot function'
+    );
     res.status(errorResponse.statusCode).json(errorResponse);
   }
-});
+}
 
 /**
- * Contact Email Function
+ * Contact Email Function - SECURED
  *
- * Handles contact form submissions with a dual email system:
- * 1. Sends notification to Jay with contact details
- * 2. Sends AI-powered auto-reply to the user
- *
- * Features:
+ * Handles contact form submissions with enhanced security:
+ * - Rate limiting (3 submissions per hour per IP)
  * - Input validation and sanitization
- * - Professional HTML email templates
- * - AI-generated personalized responses
- * - Comprehensive error handling
+ * - Origin verification
+ * - Spam detection
+ * - Request logging
  *
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
 exports.sendContactEmail = functions.https.onRequest(async (req, res) => {
+  // Apply security middleware
+  const securityMiddleware = createSecurityMiddleware({
+    limitType: 'CONTACT',
+    requiredFields: ['name', 'email', 'subject', 'message'],
+    maxSizes: {
+      name: VALIDATION_LIMITS.NAME.MAX_LENGTH,
+      email: VALIDATION_LIMITS.EMAIL.MAX_LENGTH,
+      subject: VALIDATION_LIMITS.SUBJECT.MAX_LENGTH,
+      message: VALIDATION_LIMITS.CONTACT_MESSAGE.MAX_LENGTH,
+    },
+    enableOriginValidation: true,
+  });
+
+  // Execute middleware stack
+  let currentIndex = 0;
+  const executeMiddleware = async () => {
+    if (currentIndex >= securityMiddleware.length) {
+      return handleContactRequest(req, res);
+    }
+
+    const middleware = securityMiddleware[currentIndex++];
+    
+    return new Promise((resolve, reject) => {
+      middleware(req, res, (error) => {
+        if (error) {
+          reject(error);
+        } else if (res.headersSent) {
+          resolve(); // Response already sent by middleware
+        } else {
+          executeMiddleware().then(resolve).catch(reject);
+        }
+      });
+    });
+  };
+
   try {
-    // Initialize services if not already done
+    await executeMiddleware();
+  } catch (error) {
+    if (!res.headersSent) {
+      const errorResponse = createErrorResponse(error, 'Contact security check');
+      res.status(errorResponse.statusCode).json(errorResponse);
+    }
+  }
+});
+
+async function handleContactRequest(req, res) {
+  try {
+    // Initialize services if needed
     if (!emailService || !aiService) {
       initializeServices();
     }
 
-    // Setup security and CORS
-    if (!setupSecurity(req, res)) {
-      return; // OPTIONS request handled
-    }
-
-    // Validate request method
-    if (req.method !== 'POST') {
-      const error = ErrorFactory.validationError('Only POST method is allowed');
-      const errorResponse = createErrorResponse(error, 'Invalid HTTP method');
-      return res.status(errorResponse.statusCode).json(errorResponse);
-    }
-
-    logInfo('📧 Contact email request received', {
-      method: req.method,
+    logInfo('📧 Secured contact request processed', {
+      ip: req.get('x-forwarded-for')?.split(',')[0] || req.ip,
       origin: req.get('Origin'),
     });
 
-    // Validate and sanitize contact form data
+    // Additional contact form validation
     const validation = validateContactForm(req.body);
 
     if (!validation.isValid) {
@@ -183,38 +257,21 @@ exports.sendContactEmail = functions.https.onRequest(async (req, res) => {
 
     const contactData = validation.data;
 
-    logInfo('📝 Processing contact form', {
-      name: contactData.name,
-      email: contactData.email,
-      subject: contactData.subject,
-    });
-
-    // Verify email configuration
+    // Verify email service
     const emailConfigValid = await emailService.verifyConfiguration();
     if (!emailConfigValid) {
-      throw ErrorFactory.emailError('Email service configuration invalid');
+      throw ErrorFactory.emailError('Email service temporarily unavailable');
     }
 
-    // Send notification email to Jay
-    logInfo('📤 Sending notification email to Jay...');
-    const notificationResult = await emailService.sendNotificationEmail(contactData);
+    // Process with timeout
+    await Promise.race([
+      processContactSubmission(contactData),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Processing timeout')), 30000)
+      )
+    ]);
 
-    // Generate AI-powered auto-reply
-    logInfo('🤖 Generating AI auto-reply...');
-    const aiAutoReply = await aiService.generateEmailResponse(contactData);
-
-    // Send auto-reply email to user
-    logInfo('📤 Sending auto-reply email to user...');
-    const autoReplyResult = await emailService.sendAutoReplyEmail(contactData, aiAutoReply);
-
-    // Log successful completion
-    logInfo('✅ Contact email process completed successfully', {
-      notificationId: notificationResult.messageId,
-      autoReplyId: autoReplyResult.messageId,
-      recipient: contactData.email,
-    });
-
-    // Return success response (no AI text in frontend)
+    // Return success response
     const successResponse = createSuccessResponse(
       {
         message: "Thank you for your message! I'll get back to you soon.",
@@ -224,23 +281,42 @@ exports.sendContactEmail = functions.https.onRequest(async (req, res) => {
       'Contact form submitted successfully'
     );
 
+    logInfo('✅ Secured contact form processed successfully');
     res.status(200).json(successResponse);
+
   } catch (error) {
-    // Handle specific error types
+    logError(error, 'Secured contact handler');
+    
+    let errorMessage = 'Unable to process your message at this time. Please try again later.';
     if (error.code === 'EAUTH' || error.code === 'ENOTFOUND') {
-      const emailError = ErrorFactory.emailError('Email service temporarily unavailable');
-      const errorResponse = createErrorResponse(emailError, 'Contact email function');
-      return res.status(errorResponse.statusCode).json(errorResponse);
-    } else if (error.message && error.message.includes('Gemini')) {
-      const apiError = ErrorFactory.apiError('AI service temporarily unavailable');
-      const errorResponse = createErrorResponse(apiError, 'Contact email function');
-      return res.status(errorResponse.statusCode).json(errorResponse);
+      errorMessage = 'Email service temporarily unavailable. Please try again in a few minutes.';
     }
 
-    const errorResponse = createErrorResponse(error, 'Contact email function');
+    const errorResponse = createErrorResponse(
+      ErrorFactory.emailError(errorMessage),
+      'Contact function'
+    );
     res.status(errorResponse.statusCode).json(errorResponse);
   }
-});
+}
+
+async function processContactSubmission(contactData) {
+  // Send notification email
+  logInfo('📤 Sending notification email...');
+  const notificationResult = await emailService.sendNotificationEmail(contactData);
+
+  // Generate and send auto-reply
+  logInfo('🤖 Generating auto-reply...');
+  const aiAutoReply = await aiService.generateEmailResponse(contactData);
+  
+  logInfo('📤 Sending auto-reply...');
+  const autoReplyResult = await emailService.sendAutoReplyEmail(contactData, aiAutoReply);
+
+  logInfo('✅ Contact processing completed', {
+    notificationId: notificationResult.messageId,
+    autoReplyId: autoReplyResult.messageId,
+  });
+}
 
 // Initialize services on startup
 logInfo('🚀 Firebase Functions starting up...');

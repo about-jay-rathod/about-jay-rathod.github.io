@@ -239,8 +239,10 @@ if [ "$DEPLOY_FUNCTIONS" = true ]; then
         
         # Extract function URLs (approximate, may vary by region)
         print_info "📡 Function URLs:"
-        print_info "   • Chatbot: https://chatbot-r64livvx2q-uc.a.run.app"
-        print_info "   • Contact Email: https://sendcontactemail-r64livvx2q-uc.a.run.app"
+        print_info "🔒 API Endpoints: Configured dynamically for security"
+        print_info "   • Local Dev: http://localhost:5001/YOUR-PROJECT-ID/us-central1/chatbot"
+        print_info "   • Local Dev: http://localhost:5001/YOUR-PROJECT-ID/us-central1/sendContactEmail"
+        print_info "   • Production: Access through website interface with proper authentication"
         print_success "✅ Function endpoints are accessible and ready!"
     else
         print_error "❌ Firebase Functions deployment failed!"

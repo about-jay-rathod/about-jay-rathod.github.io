@@ -1,9 +1,69 @@
+// =================================================================
+// Secure Configuration - PRODUCTION READY
+// =================================================================
+
 /**
- * Template Name: Personal - v2.1.0
- * Template URL: https://bootstrapmade.com/personal-free-resume-bootstrap-template/
- * Author: BootstrapMade.com
- * License: https://bootstrapmade.com/license/
+ * Get secure API endpoint URL
+ * This prevents hardcoding URLs and enables easy configuration changes
  */
+function getAPIEndpoint(type) {
+   // Check if we have environment-specific configuration
+   if (window.portfolioConfig && window.portfolioConfig.apiEndpoints) {
+      return window.portfolioConfig.apiEndpoints[type];
+   }
+   
+   // Production default endpoints (these should be set via environment)
+   const endpoints = {
+      contact: '/api/contact',
+      chatbot: '/api/chatbot'
+   };
+   
+   return endpoints[type] || '/api/unknown';
+}
+
+/**
+ * Validate input for security
+ */
+function sanitizeInput(input, maxLength = 1000) {
+   if (!input || typeof input !== 'string') return '';
+   
+   return input
+      .trim()
+      .substring(0, maxLength)
+      .replace(/[<>'"&]/g, '') // Remove potentially dangerous characters
+      .replace(/\s+/g, ' '); // Normalize whitespace
+}
+
+/**
+ * Rate limiting client-side helper
+ */
+const rateLimiter = {
+   attempts: {},
+   
+   canMakeRequest: function(type, limit = 5, window = 60000) { // 5 requests per minute default
+      const now = Date.now();
+      const key = type;
+      
+      if (!this.attempts[key]) {
+         this.attempts[key] = [];
+      }
+      
+      // Remove old attempts outside the time window
+      this.attempts[key] = this.attempts[key].filter(time => now - time < window);
+      
+      // Check if we're under the limit
+      if (this.attempts[key].length < limit) {
+         this.attempts[key].push(now);
+         return true;
+      }
+      
+      return false;
+   }
+};
+
+// =================================================================
+// Original Template Code
+// =================================================================
 !(function ($) {
    "use strict";
 
@@ -194,30 +254,40 @@ document.addEventListener('DOMContentLoaded', () => {
             message: formData.get('message')
          };
 
-         // Use Firebase Function (secure API key and email sending)
-         const firebaseProjectId = 'about-jay-rathod';
-         const functionUrl = `https://sendcontactemail-r64livvx2q-uc.a.run.app`;
+         // Use secure API endpoint (no hardcoded URLs)
+         const functionUrl = getAPIEndpoint('contact');
 
          try {
             const response = await fetch(functionUrl, {
                method: 'POST',
                headers: {
                   'Content-Type': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest'
                },
                body: JSON.stringify(data)
             });
             
             const result = await response.json();
             
-            if (result.success) {
+            if (response.ok && result.success) {
                const successMsg = `✅ Thank you ${data.name}!\n\nYour message has been sent successfully.\n\n📧 Check your email for confirmation details.\n\nJay will personally reply within 24-48 hours.`;
                showMessage(sentMessage, successMsg);
             } else {
-               showMessage(errorMessage, result.error?.message || result.message || 'Failed to send message. Please try again later.', true);
+               let errorMsg = 'Failed to send message. Please try again later.';
+               
+               if (response.status === 429) {
+                  errorMsg = 'Too many requests. Please wait a moment before submitting again.';
+               } else if (response.status === 403) {
+                  errorMsg = 'Access denied. Please refresh the page and try again.';
+               } else if (result.message) {
+                  errorMsg = result.message;
+               }
+               
+               showMessage(errorMessage, errorMsg, true);
             }
          } catch (error) {
             console.error('Contact form error:', error);
-            showMessage(errorMessage, 'Failed to send message. Please try again later.', true);
+            showMessage(errorMessage, 'Network error. Please check your connection and try again.', true);
          }
       });
    }
@@ -254,19 +324,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
    async function handleSendMessage() {
       const userInput = inputField.value.trim();
+      
+      // Input validation
       if (userInput === '' || inputField.disabled) return;
+      
+      // Sanitize input
+      const sanitizedInput = sanitizeInput(userInput, 1000);
+      if (sanitizedInput.length < 1) {
+         addMessageToUI("Please enter a valid message.", 'bot');
+         return;
+      }
+      
+      // Client-side rate limiting
+      if (!rateLimiter.canMakeRequest('chatbot', 3, 60000)) { // 3 requests per minute
+         addMessageToUI("Please wait a moment before sending another message.", 'bot');
+         return;
+      }
 
-      addMessageToUI(userInput, 'user');
+      addMessageToUI(sanitizedInput, 'user');
       chatHistory.push({
          type: 'user',
-         text: userInput
+         text: sanitizedInput
       });
 
       inputField.value = '';
+      inputField.disabled = true;
       const typingIndicator = showTypingIndicator();
 
       try {
-         const botResponse = await getGeminiResponse(userInput);
+         const botResponse = await getGeminiResponse(sanitizedInput);
          typingIndicator.remove();
          addMessageToUI(botResponse, 'bot');
          chatHistory.push({
@@ -275,9 +361,12 @@ document.addEventListener('DOMContentLoaded', () => {
          });
       } catch (error) {
          typingIndicator.remove();
-         addMessageToUI("My apologies, I'm having a bit of trouble connecting right now. Please try your question again in a moment.", 'bot');
-         console.error("Gemini API Error:", error);
+         addMessageToUI("I apologize, but I'm having trouble right now. Please try your question again in a moment.", 'bot');
+         console.error("Chatbot Error:", error);
+         // Remove the user message from history if bot failed
          chatHistory.pop();
+      } finally {
+         inputField.disabled = false;
       }
    }
 
@@ -314,15 +403,15 @@ document.addEventListener('DOMContentLoaded', () => {
    }
 
    async function getGeminiResponse(currentPrompt) {
-      // Try Firebase Function first (secure API key)
-      const firebaseProjectId = 'about-jay-rathod';
-      const functionUrl = `https://chatbot-r64livvx2q-uc.a.run.app`;
-
       try {
+         // Use secure API endpoint (no hardcoded URLs or keys)
+         const functionUrl = getAPIEndpoint('chatbot');
+         
          const response = await fetch(functionUrl, {
             method: 'POST',
             headers: {
                'Content-Type': 'application/json',
+               'X-Requested-With': 'XMLHttpRequest'
             },
             body: JSON.stringify({ message: currentPrompt })
          });
@@ -334,62 +423,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
          }
          
-         // If Firebase function fails, fall back to direct API with Gist data
-         throw new Error('Firebase function unavailable');
+         // Handle different error types
+         if (response.status === 429) {
+            return "I'm receiving too many questions right now. Please wait a moment before asking another question.";
+         } else if (response.status === 403) {
+            return "Access denied. Please refresh the page and try again.";
+         } else {
+            const errorResult = await response.json().catch(() => ({}));
+            return errorResult.message || "I'm having trouble connecting right now. Please try your question again in a moment.";
+         }
          
       } catch (error) {
-         console.log('Firebase function failed, falling back to direct API:', error.message);
-         
-         // Fallback to direct Gemini API with your Gist data (single source of truth)
-         // NOTE: This exposes API key - only use as fallback when Firebase Functions are unavailable
-         console.warn('Using fallback API - this exposes API keys. Please upgrade to Blaze plan and deploy Functions.');
-         const apiKey = "YOUR_API_KEY_REMOVED_FOR_SECURITY";
-         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-         // Include conversation history in the prompt
-         const historyString = chatHistory
-            .slice(0, currentPrompt ? -1 : undefined)
-            .map(message => message.type === 'user' ? `Previous Question: ${message.text}` : `My Previous Answer: ${message.text}`)
-            .join('\n\n');
-
-         // Use ONLY your Gist data - no hardcoded fallbacks
-         if (!systemPrompt) {
-            throw new Error('Professional data not available. Please try again in a moment.');
-         }
-
-         const finalPrompt = `${systemPrompt}\n\n--- CONVERSATION HISTORY ---\n${historyString}\n\nCURRENT QUESTION: ${currentPrompt}`;
-
-         const payload = {
-            contents: [{
-               parts: [{
-                  text: finalPrompt
-               }]
-            }]
-         };
-
-         const directResponse = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-               'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(payload)
-         });
-
-         if (!directResponse.ok) {
-            const errorBody = await directResponse.text();
-            throw new Error(`API request failed with status ${directResponse.status}: ${errorBody}`);
-         }
-
-         const result = await directResponse.json();
-
-         if (!result.candidates || result.candidates.length === 0 || !result.candidates[0].content || !result.candidates[0].content.parts) {
-            if (result.promptFeedback && result.promptFeedback.blockReason) {
-               return `I am unable to provide a response. Reason: ${result.promptFeedback.blockReason}`;
-            }
-            throw new Error("Invalid API response structure.");
-         }
-
-         return result.candidates[0].content.parts[0].text;
+         console.error('Chatbot API Error:', error);
+         return "I apologize, but I'm having connectivity issues right now. Please try again in a few moments.";
       }
    }
 

@@ -247,8 +247,10 @@ if ($DeployFunctions) {
         Write-Success "✅ All serverless functions are now live and operational!"
         
         Write-Info "📡 Function URLs:"
-        Write-Info "   • Chatbot: https://chatbot-r64livvx2q-uc.a.run.app"
-        Write-Info "   • Contact Email: https://sendcontactemail-r64livvx2q-uc.a.run.app"
+        Write-Info "🔒 API Endpoints: Configured dynamically for security"
+        Write-Info "   • Local Dev: http://localhost:5001/YOUR-PROJECT-ID/us-central1/chatbot"
+        Write-Info "   • Local Dev: http://localhost:5001/YOUR-PROJECT-ID/us-central1/sendContactEmail"
+        Write-Info "   • Production: Access through website interface with proper authentication"
     } else {
         Write-Error "❌ Firebase Functions deployment failed!"
         exit 1
