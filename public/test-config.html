@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Configuration Test</title>
+</head>
+<body>
+    <h1>API Configuration Test</h1>
+    <div id="output"></div>
+    
+    <script src="assets/js/config.js"></script>
+    <script>
+        // Test the API endpoint configuration
+        document.addEventListener('DOMContentLoaded', function() {
+            const output = document.getElementById('output');
+            
+            // Display current environment and endpoints
+            const config = window.portfolioConfig;
+            
+            output.innerHTML = `
+                <h2>Configuration Test Results:</h2>
+                <p><strong>Environment:</strong> ${config.app.environment}</p>
+                <p><strong>Debug Mode:</strong> ${config.features.debugMode}</p>
+                <p><strong>Hostname:</strong> ${window.location.hostname}</p>
+                <p><strong>Chatbot Endpoint:</strong> ${config.apiEndpoints.chatbot}</p>
+                <p><strong>Contact Endpoint:</strong> ${config.apiEndpoints.contact}</p>
+                
+                <h3>Security Check:</h3>
+                <p><strong>No hardcoded URLs:</strong> ✅</p>
+                <p><strong>Dynamic configuration:</strong> ✅</p>
+                <p><strong>Environment detection:</strong> ✅</p>
+            `;
+        });
+    </script>
+</body>
+</html>

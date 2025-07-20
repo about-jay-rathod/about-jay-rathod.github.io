@@ -1,219 +1,40 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# 🔐 SECURITY - NEVER COMMIT SENSITIVE DATA (CRITICAL!)
+# 🔐 PRIVATE CREDENTIALS BRANCH - INCLUDES ALL SENSITIVE FILES
 # ═══════════════════════════════════════════════════════════════════════════
+# ⚠️  WARNING: This branch contains actual API keys and credentials
+# ⚠️  NEVER PUSH THIS BRANCH TO PUBLIC REPOSITORIES
+# ⚠️  KEEP THIS BRANCH PRIVATE AT ALL TIMES
 
-# Local development configuration (CRITICAL - Contains project details)
-local-env.js
-local-dev.html
-dev-config.js
-test-config.js
-**/local-*.js
-**/dev-*.js
-**/test-*.js
-
-# Environment Variables (CRITICAL - Contains API Keys & Passwords)
-.env
-.env.*
-.env.local
-.env.production
-.env.staging
-functions/.env
-functions/.env.*
-!functions/.env.template
-!.env.example
-*.env*
-!*.env.example
-
-# Temporary development files
-temp-*
-test-*
-debug-*
-**/temp-*
-**/test-*
-**/debug-*
-
-# Firebase Configuration (Contains sensitive project info)
-.firebase/
-.firebaserc
-firebase-debug.log
-firebase-debug.*.log
-
-# Google Cloud & Firebase Service Account Keys
-*.json
-!package*.json
-!firebase.json
-!tsconfig.json
-serviceAccountKey.json
-google-services.json
-GoogleService-Info.plist
-
-# API Keys & Secrets Files
-**/secrets/
-**/keys/
-*.pem
-*.p12
-*.key
-*.crt
-*.cert
-api-keys.js
-credentials.js
-auth-config.js
-functions/config.js
-functions/secrets.js
-
-# Temporary security files
-temp-keys.*
-backup-env.*
-config-local.*
-
-# IDE-specific sensitive files
-.vscode/settings.json
-.idea/
-
-# OS-specific sensitive files
-.DS_Store
-Thumbs.db
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 🛠️ NODE.JS & NPM
-# ═══════════════════════════════════════════════════════════════════════════
-
-# Dependencies
+# Only exclude large/unnecessary files - KEEP ALL CREDENTIALS
 node_modules/
 functions/node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+
+# Exclude large package files (can be regenerated)
 package-lock.json
 yarn.lock
 
-# Logs & Runtime
-*.log
-logs/
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# NPM & Cache
-.npm
-.eslintcache
-.yarn-integrity
-
-# Coverage & Testing
-coverage/
-.nyc_output
-test-results/
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 💻 DEVELOPMENT & BUILD
-# ═══════════════════════════════════════════════════════════════════════════
-
-# Build outputs
+# Exclude large build outputs
 dist/
 build/
-public/build/
-.next/
-out/
-
-# Cache directories
 .cache/
-.parcel-cache/
-tmp/
-temp/
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 🖥️ OPERATING SYSTEM FILES
+# ✅ CREDENTIALS INCLUDED (Unlike public branch)
 # ═══════════════════════════════════════════════════════════════════════════
+# The following files ARE INCLUDED in this private branch:
+# - .env (with real API keys)
+# - .firebaserc (with project details)  
+# - firebase-debug.log (with debug info)
+# - pglite-debug.log (with logs)
+# - All configuration files with sensitive data
 
-# Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
-[Dd]esktop.ini
-$RECYCLE.BIN/
-
-# macOS
-.DS_Store
-.DS_Store?
-._*
-.AppleDouble
-.LSOverride
-.Spotlight-V100
-.Trashes
-.VolumeIcon.icns
-.DocumentRevisions-V100
-.fseventsd
-.TemporaryItems
-.com.apple.timemachine.donotpresent
-
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 🔧 IDEs & EDITORS
-# ═══════════════════════════════════════════════════════════════════════════
-
-# Visual Studio Code
-.vscode/
-!.vscode/settings.json.template
-*.code-workspace
-
-# IntelliJ IDEA
-.idea/
-*.iws
-*.iml
-*.ipr
-
-# Sublime Text
-*.sublime-workspace
-*.sublime-project
-
-# ═══════════════════════════════════════════════════════════════════════════
-# 🗂️ PROJECT SPECIFIC
-# ═══════════════════════════════════════════════════════════════════════════
-
-# Temporary & Personal Files
-temporary.txt
-pglite-debug.log
-temp-*
-test-*
-draft-*
-backup-*
-personal-notes.md
-private-*
-confidential-*
-
-# Old versions
-*.old
-*.backup
-*-old.*
-
-# Development utilities
-dev-tools/
-scripts/private/
-
-# ═══════════════════════════════════════════════════════════════════════════
-# ✅ EXPLICITLY ALLOWED FILES (Keep these!)
-# ═══════════════════════════════════════════════════════════════════════════
-
-# Important configuration files
-!.gitignore
-!README.md
-!LICENSE
-!package.json
-!firebase.json
-
-# Documentation files  
-!*.md
-!docs/
-!DEPENDENCIES.md
-!COMMANDS_REFERENCE.md
-
-# Template files (safe to share)
-!functions/.env.template
+# ⚠️  SECURITY REMINDER: 
+# This branch should only be used for:
+# - Local development with all credentials
+# - Private backups of configuration
+# - Team members who need full access
+# 
+# NEVER:
+# - Push to public GitHub
+# - Share publicly
+# - Use for production deployment (use environment variables instead)
