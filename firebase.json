@@ -9,6 +9,10 @@
     ],
     "rewrites": [
       {
+        "source": "/api/config",
+        "function": "config"
+      },
+      {
         "source": "/api/chatbot",
         "function": "chatbot"
       },
@@ -33,7 +37,7 @@
       "port": 5001
     },
     "hosting": {
-      "port": 5000
+      "port": 5002
     },
     "ui": {
       "enabled": true

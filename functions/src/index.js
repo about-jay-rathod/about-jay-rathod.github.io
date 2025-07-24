@@ -26,13 +26,68 @@
 
 // Core Dependencies
 const functions = require('firebase-functions');
-require('dotenv').config();
+const path = require('path');
+const fs = require('fs');
 
-// Import Services
-const EmailService = require('./services/EmailService');
-const AIService = require('./services/AIService');
+// For local development, read from .env file
+if (!process.env.FUNCTIONS_EMULATOR) {
+  // Production - use Firebase config
+  const config = functions.config();
+  
+  // Set environment variables from Firebase config
+  process.env.CHATBOT_ENABLED = config.chatbot?.enabled || 'disabled';
+  process.env.MESSAGING_ENABLED = config.messaging?.enabled || 'disabled';
+  process.env.GEMINI_API_KEY = config.gemini?.key || '';
+  process.env.EMAIL_USER = config.gmail?.email || '';
+  process.env.EMAIL_PASS = config.gmail?.app_password || '';
+  process.env.EMAIL_TO = config.gmail?.email || '';
+  process.env.NODE_ENV = 'production';
+} else {
+  // Local development - read environment variables from .env file
+  try {
+    // Read .env file from root directory
+    const envPath = path.join(__dirname, '../../.env');
+    if (fs.existsSync(envPath)) {
+      const envContent = fs.readFileSync(envPath, 'utf8');
+      const envLines = envContent.split('\n');
+      
+      envLines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed && !trimmed.startsWith('#')) {
+          const [key, ...valueParts] = trimmed.split('=');
+          if (key && valueParts.length > 0) {
+            const value = valueParts.join('=');
+            process.env[key.trim()] = value.trim();
+          }
+        }
+      });
+    } else {
+      // Fallback values
+      process.env.CHATBOT_ENABLED = 'enabled';  
+      process.env.MESSAGING_ENABLED = 'enabled';  
+      process.env.GEMINI_API_KEY = 'AIzaSyCi50PaYksNaInX-M9WSAO9wm6xygEbMhI';
+      process.env.EMAIL_USER = 'jayrathod.ca@gmail.com';
+      process.env.EMAIL_PASS = 'zutr lcot hcst gdpt';
+      process.env.EMAIL_TO = 'jayrathod.ca@gmail.com';
+      process.env.NODE_ENV = 'development';
+    }
+  } catch (error) {
+    // Fallback values
+    process.env.CHATBOT_ENABLED = 'enabled';  
+    process.env.MESSAGING_ENABLED = 'enabled';  
+    process.env.GEMINI_API_KEY = 'AIzaSyCi50PaYksNaInX-M9WSAO9wm6xygEbMhI';
+    process.env.EMAIL_USER = 'jayrathod.ca@gmail.com';
+    process.env.EMAIL_PASS = 'zutr lcot hcst gdpt';
+    process.env.EMAIL_TO = 'jayrathod.ca@gmail.com';
+    process.env.NODE_ENV = 'development';
+  }
+}
 
-// Import Security & Utilities
+// Feature Toggle Configuration - read from environment variables
+const CHATBOT_ENABLED = process.env.CHATBOT_ENABLED === 'enabled';
+const MESSAGING_ENABLED = process.env.MESSAGING_ENABLED === 'enabled';
+
+// Import Security & Utilities (always needed)
 const { validateContactForm, validateChatbotMessage } = require('./utils/validation');
 const {
   createErrorResponse,
@@ -50,16 +105,19 @@ let emailService;
 let aiService;
 
 /**
- * Initialize services and validate environment
+ * Initialize services and validate environment (lazy loading)
  */
 function initializeServices() {
   try {
-    // Validate required environment variables
-    validateEnvironmentVariables(['GEMINI_API_KEY', 'EMAIL_USER', 'EMAIL_PASS']);
-
-    // Initialize services
-    emailService = new EmailService();
-    aiService = new AIService();
+    // Only import and initialize services when actually needed
+    if (!emailService) {
+      const EmailService = require('./services/EmailService');
+      emailService = new EmailService();
+    }
+    if (!aiService) {
+      const AIService = require('./services/AIService');
+      aiService = new AIService();
+    }
 
     logInfo('🚀 Services initialized successfully');
   } catch (error) {
@@ -81,18 +139,19 @@ function initializeServices() {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-exports.chatbot = functions.https.onRequest(async (req, res) => {
-  // Apply security middleware
-  const securityMiddleware = createSecurityMiddleware({
-    limitType: 'CHATBOT',
-    requiredFields: ['message'],
-    maxSizes: { message: VALIDATION_LIMITS.MESSAGE.MAX_LENGTH },
-    enableOriginValidation: true,
-  });
+if (CHATBOT_ENABLED) {
+  exports.chatbot = functions.https.onRequest(async (req, res) => {
+    // Apply security middleware
+    const securityMiddleware = createSecurityMiddleware({
+      limitType: 'CHATBOT',
+      requiredFields: ['message'],
+      maxSizes: { message: VALIDATION_LIMITS.MESSAGE.MAX_LENGTH },
+      enableOriginValidation: true,
+    });
 
-  // Execute middleware stack
-  let currentIndex = 0;
-  const executeMiddleware = async () => {
+    // Execute middleware stack
+    let currentIndex = 0;
+    const executeMiddleware = async () => {
     if (currentIndex >= securityMiddleware.length) {
       return handleChatbotRequest(req, res);
     }
@@ -173,6 +232,8 @@ async function handleChatbotRequest(req, res) {
   }
 }
 
+} // End of CHATBOT_ENABLED conditional export
+
 /**
  * Contact Email Function - SECURED
  *
@@ -186,15 +247,16 @@ async function handleChatbotRequest(req, res) {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-exports.sendContactEmail = functions.https.onRequest(async (req, res) => {
-  // Apply security middleware
-  const securityMiddleware = createSecurityMiddleware({
-    limitType: 'CONTACT',
-    requiredFields: ['name', 'email', 'subject', 'message'],
-    maxSizes: {
-      name: VALIDATION_LIMITS.NAME.MAX_LENGTH,
-      email: VALIDATION_LIMITS.EMAIL.MAX_LENGTH,
-      subject: VALIDATION_LIMITS.SUBJECT.MAX_LENGTH,
+if (MESSAGING_ENABLED) {
+  exports.sendContactEmail = functions.https.onRequest(async (req, res) => {
+    // Apply security middleware
+    const securityMiddleware = createSecurityMiddleware({
+      limitType: 'CONTACT',
+      requiredFields: ['name', 'email', 'subject', 'message'],
+      maxSizes: {
+        name: VALIDATION_LIMITS.NAME.MAX_LENGTH,
+        email: VALIDATION_LIMITS.EMAIL.MAX_LENGTH,
+        subject: VALIDATION_LIMITS.SUBJECT.MAX_LENGTH,
       message: VALIDATION_LIMITS.CONTACT_MESSAGE.MAX_LENGTH,
     },
     enableOriginValidation: true,
@@ -231,6 +293,8 @@ exports.sendContactEmail = functions.https.onRequest(async (req, res) => {
     }
   }
 });
+
+} // End of MESSAGING_ENABLED conditional export
 
 async function handleContactRequest(req, res) {
   try {
@@ -318,12 +382,56 @@ async function processContactSubmission(contactData) {
   });
 }
 
-// Initialize services on startup
-logInfo('🚀 Firebase Functions starting up...');
-try {
-  initializeServices();
-  logInfo('✅ Firebase Functions ready');
-} catch (error) {
-  logError(error, 'Startup initialization');
-  // Functions will still deploy but may not work properly
-}
+/**
+ * Configuration Endpoint
+ * Serves frontend configuration based on environment variables
+ * This function doesn't require API keys, so we don't validate them
+ */
+exports.config = functions.https.onRequest(async (req, res) => {
+  // Set CORS headers
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.set('Content-Type', 'application/javascript');
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    res.status(200).send('');
+    return;
+  }
+
+  try {
+    // Generate configuration based on environment variables
+    const config = {
+      chatbotEnabled: CHATBOT_ENABLED,
+      messagingEnabled: MESSAGING_ENABLED,
+      apiEndpoints: {
+        chatbot: '/api/chatbot',
+        contact: '/api/sendContactEmail'
+      }
+    };
+
+    // Return as JavaScript that sets a global variable
+    const configScript = `
+window.portfolioConfig = ${JSON.stringify(config, null, 2)};
+console.log('Portfolio configuration loaded:', window.portfolioConfig);
+    `;
+
+    res.status(200).send(configScript);
+  } catch (error) {
+    console.error('Config endpoint error:', error);
+    // Return a default config if there's an error
+    const defaultConfigScript = `
+window.portfolioConfig = {
+  chatbotEnabled: false,
+  messagingEnabled: false,
+  apiEndpoints: { chatbot: '/api/chatbot', contact: '/api/sendContactEmail' }
+};
+console.log('Default configuration loaded due to error');
+    `;
+    res.status(200).send(defaultConfigScript);
+  }
+});
+
+// Services will be initialized on first use, not at startup
+logInfo('🚀 Firebase Functions ready for requests');

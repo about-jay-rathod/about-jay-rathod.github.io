@@ -912,6 +912,53 @@
       <script src="assets/js/config.js"></script>
       
       <!-- Main JavaScript -->
+      <!-- Portfolio Configuration -->
+      <script>
+         // Fallback configuration when functions are not available
+         window.portfolioConfig = {
+            chatbotEnabled: false,  // Set to false to disable chatbot
+            messagingEnabled: false, // Set to false to disable contact form
+            apiEndpoints: {
+               chatbot: '/api/chatbot',
+               contact: '/api/sendContactEmail'
+            }
+         };
+         console.log('Default portfolio configuration loaded:', window.portfolioConfig);
+      </script>
+      
+      <!-- Try to load dynamic configuration (will override defaults if available) -->
+      <script src="/api/config" onerror="console.log('Dynamic config unavailable, using defaults')"></script>
+      
+      <!-- Feature Toggle Manager -->
+      <script>
+         // Apply feature toggle classes to body based on configuration
+         document.addEventListener('DOMContentLoaded', () => {
+            if (window.portfolioConfig) {
+               const body = document.body;
+               
+               // Apply chatbot state
+               if (!window.portfolioConfig.chatbotEnabled) {
+                  body.classList.add('chatbot-disabled');
+                  console.log('Chatbot disabled');
+               } else {
+                  body.classList.remove('chatbot-disabled');
+                  console.log('Chatbot enabled');
+               }
+               
+               // Apply messaging state
+               if (!window.portfolioConfig.messagingEnabled) {
+                  body.classList.add('messaging-disabled');
+                  console.log('Messaging disabled');
+               } else {
+                  body.classList.remove('messaging-disabled');
+                  console.log('Messaging enabled');
+               }
+            } else {
+               console.warn('No portfolio configuration found');
+            }
+         });
+      </script>
+      
       <script src="assets/js/main.js"></script>
    </body>
 </html>

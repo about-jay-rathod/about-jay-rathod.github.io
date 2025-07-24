@@ -2313,3 +2313,42 @@ body {
 		transform: translateX(-50%);
 	}
 }
+
+/* =================================================================
+   FEATURE TOGGLE SYSTEM - DYNAMIC SHOW/HIDE
+   ================================================================= */
+
+/* Hide chatbot when disabled */
+body.chatbot-disabled #ai-chatbot-button,
+body.chatbot-disabled #ai-chatbot-window,
+body.chatbot-disabled .ai-chatbot-button,
+body.chatbot-disabled .ai-chatbot-window {
+	display: none !important;
+	visibility: hidden !important;
+}
+
+/* Hide contact form when disabled - maintain layout spacing */
+body.messaging-disabled .custom-email-container {
+	opacity: 0 !important;
+	visibility: hidden !important;
+	height: 0 !important;
+	overflow: hidden !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	transition: all 0.3s ease !important;
+}
+
+/* When messaging is enabled, ensure proper display */
+body:not(.messaging-disabled) .custom-email-container {
+	opacity: 1;
+	visibility: visible;
+	height: auto;
+	overflow: visible;
+	transition: all 0.3s ease;
+}
+
+/* Hide individual form elements for extra safety */
+body.messaging-disabled #contact-form,
+body.messaging-disabled .custom-email-form {
+	display: none !important;
+}
