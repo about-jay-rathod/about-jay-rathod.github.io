@@ -65,9 +65,9 @@ if (!process.env.FUNCTIONS_EMULATOR) {
       // Fallback values
       process.env.CHATBOT_ENABLED = 'enabled';  
       process.env.MESSAGING_ENABLED = 'enabled';  
-      process.env.GEMINI_API_KEY = 'AIzaSyCi50PaYksNaInX-M9WSAO9wm6xygEbMhI';
+      process.env.GEMINI_API_KEY = 'AIzaSyD-xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
       process.env.EMAIL_USER = 'jayrathod.ca@gmail.com';
-      process.env.EMAIL_PASS = 'zutr lcot hcst gdpt';
+      process.env.EMAIL_PASS = 'hulu lulu lulu lulu';
       process.env.EMAIL_TO = 'jayrathod.ca@gmail.com';
       process.env.NODE_ENV = 'development';
     }
@@ -75,9 +75,9 @@ if (!process.env.FUNCTIONS_EMULATOR) {
     // Fallback values
     process.env.CHATBOT_ENABLED = 'enabled';  
     process.env.MESSAGING_ENABLED = 'enabled';  
-    process.env.GEMINI_API_KEY = 'AIzaSyCi50PaYksNaInX-M9WSAO9wm6xygEbMhI';
+    process.env.GEMINI_API_KEY = 'AIzaSyD-xxxxxxxxxxxxxxxxxxxxxxxxxxxx';
     process.env.EMAIL_USER = 'jayrathod.ca@gmail.com';
-    process.env.EMAIL_PASS = 'zutr lcot hcst gdpt';
+    process.env.EMAIL_PASS = 'hulu lulu lulu lulu';
     process.env.EMAIL_TO = 'jayrathod.ca@gmail.com';
     process.env.NODE_ENV = 'development';
   }

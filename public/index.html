@@ -908,26 +908,21 @@
          });
       </script>
       <!-- Template Main JS File -->
-      <!-- Configuration (load before main scripts) -->
-      <script src="assets/js/config.js"></script>
       
       <!-- Main JavaScript -->
       <!-- Portfolio Configuration -->
       <script>
-         // Fallback configuration when functions are not available
+         // Static configuration for disabled features (pure static site)
          window.portfolioConfig = {
-            chatbotEnabled: false,  // Set to false to disable chatbot
-            messagingEnabled: false, // Set to false to disable contact form
+            chatbotEnabled: false,  // Disabled for cost savings
+            messagingEnabled: false, // Disabled for cost savings
             apiEndpoints: {
                chatbot: '/api/chatbot',
                contact: '/api/sendContactEmail'
             }
          };
-         console.log('Default portfolio configuration loaded:', window.portfolioConfig);
+         console.log('Static portfolio configuration loaded (both features disabled):', window.portfolioConfig);
       </script>
-      
-      <!-- Try to load dynamic configuration (will override defaults if available) -->
-      <script src="/api/config" onerror="console.log('Dynamic config unavailable, using defaults')"></script>
       
       <!-- Feature Toggle Manager -->
       <script>
